@@ -1,6 +1,6 @@
 "use client";
 import React, { useReducer } from 'react';
-import Card from '../components/Card';
+import Card from './Card';
 
 const venuesData = [
   { vid: "001", name: "The Bloom Pavilion", img: "/img/bloom.jpg" },

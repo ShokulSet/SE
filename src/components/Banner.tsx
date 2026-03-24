@@ -1,49 +1,53 @@
 "use client";
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 export default function Banner() {
-    const covers = ['/img/cover.jpg', '/img/cover2.jpg', '/img/cover3.jpg', '/img/cover4.jpg'];
-    const [index, setIndex] = useState(0);
     const router = useRouter();
     const { data: session } = useSession();
 
     return (
-        <div
-            className="relative w-full h-96 overflow-hidden cursor-pointer"
-            onClick={() => setIndex((index + 1) % covers.length)}
-        >
+        <div className="relative w-full h-screen overflow-hidden">
             <img
-                src={covers[index]}
-                alt="Banner"
-                className="w-full h-96 object-cover"
+                src="/banner2.png"
+                alt="banner2"
+                className="w-full h-full opacity-50 object-cover absolute inset-0"
             />
 
-            {/* Welcome message ขวาบน — แสดงเมื่อ Login แล้ว */}
-            {session && (
-                <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm 
-                                text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow">
-                    Welcome {session.user?.name}
-                </div>
-            )}
-
+            {/* รวมทุกอย่างไว้ใน div เดียว เรียงบนลงล่าง */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-                            text-center text-white bg-black/40 rounded-xl p-10">
-                <h1 className="text-4xl font-bold">Where every event finds its venue</h1>
-                <p>บริการจองสถานที่จัดเลี้ยงครบวงจร ตอบโจทย์ทุกโอกาสพิเศษของคุณ</p>
-            </div>
+                            flex flex-col items-center gap-4 text-center">
+                
+                {/* Heading — เปลี่ยนตามสถานะ login */}
+                <div className="font-playfair font-medium text-5xl flex gap-2">
+                    {session ? (
+                        <h1 className="text-white">
+                            Welcome <span className="text-yellow-500 font-bold">{session.user?.name}</span>
+                        </h1>
+                    ) : (
+                        <>
+                            <h1 className="text-white">The Pinnacle of</h1>
+                            <h1 className="text-yellow-500 font-bold ">Culinary Art</h1>
+                        </>
+                    )}
+                </div>
 
-            <button
-                className="absolute bottom-5 right-5 bg-white text-black font-semibold 
-                           py-2 px-4 rounded-lg shadow-lg hover:bg-gray-200"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    router.push('/venue');
-                }}
-            >
-                Select Venue
-            </button>
+                {/* Subtext */}
+                <p className="text-white text-lg font-thin max-w-lg mt-2 tracking-wide">
+                    Experience unparalleled luxury dining where every dish is a masterpiece
+                </p>
+
+                {/* ปุ่ม */}
+                <button
+                    className="mt-2 text-sm font-medium px-6 py-2
+                               text-white border border-yellow-500
+                             bg-yellow-500 hover:text-black
+                               transition-all duration-200"
+                    onClick={() => router.push('/venue')}
+                >
+                    Select Venue
+                </button>
+            </div>
         </div>
     );
 }

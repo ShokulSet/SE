@@ -6,6 +6,9 @@ export const authOptions: AuthOptions = {
     session: {
         strategy: "jwt"
     },
+    pages: {
+        signIn: "/signin"  // เพิ่มบรรทัดนี้
+    },
     providers: [
         CredentialsProvider({
             name: "Credentials",

@@ -1,48 +1,26 @@
-import Image from 'next/image';
 import TopMenuItem from './TopMenuItem';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
+import AuthButton from './AuthButton';
 import Link from 'next/link';
 
-export default async function TopMenu() {
-    const session = await getServerSession(authOptions);
-
+export default function TopMenu() {
     return (
-        <div className="h-16 flex justify-between items-center bg-white shadow-md px-5 fixed top-0 w-full z-50">
-            {/* ซ้าย: Sign-In / Sign-Out */}
-            <div className="flex items-center gap-3">
-                {session ? (
-                    <Link
-                        href="/api/auth/signout"
-                        className="text-sm font-medium text-red-500 hover:text-red-700 
-                                   px-3 py-1.5 rounded-lg border border-red-200 
-                                   hover:bg-red-50 transition"
-                    >
-                        Sign-Out
-                    </Link>
-                ) : (
-                    <Link
-                        href="/api/auth/signin"
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800 
-                                   px-3 py-1.5 rounded-lg border border-blue-200 
-                                   hover:bg-blue-50 transition"
-                    >
-                        Sign-In
-                    </Link>
-                )}
-                <TopMenuItem title="My Booking" href="/mybooking" />
-            </div>
+        <div className="h-16 bg-black fixed top-0 w-full z-50 border-b border-yellow-600/40">
+            <div className="max-w-7xl mx-auto h-full px-6 flex justify-between items-center">
 
-            {/* ขวา: Menu Navigation + Logo */}
-            <div className="flex items-center gap-5">
-                {/* เพิ่มเมนู My Booking เข้าไปตรงนี้ */}
-                
-                {/* เมนู Booking เดิม */}
-                <TopMenuItem title="Booking" href="/booking" />
-                
-                {/* Logo ของระบบ */}
-                <div className='flex items-center h-full'>
-                    <Image src="/img/logo.png" alt="Logo" width={40} height={40} className='object-contain' />
+                {/* Logo */}
+                <Link href="/">
+                    <div className='flex items-center gap-2'>
+                        <h1 className="font-playfair text-xl font-bold tracking-widest text-yellow-500">
+                            NEWWAVE
+                        </h1>
+                        <h3 className='text-white'>restaurant</h3>
+                    </div>
+                </Link>
+
+                <div className="flex items-center gap-2">
+                    <TopMenuItem title="Booking" href="/booking" />
+                    <TopMenuItem title="My Booking" href="/mybooking" />
+                    <AuthButton />
                 </div>
             </div>
         </div>
