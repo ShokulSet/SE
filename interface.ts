@@ -28,8 +28,15 @@ export interface BookingItem {
 export interface ReviewItem {
     _id: string
     rating: number
-    user: string | { _id: string; name: string }
-    restaurant: string
+    description?: string
+    user: string | { _id: string; name?: string; email?: string }
+    restaurant:
+        | string
+        | {
+              _id: string
+              name?: string
+              address?: string
+          }
     createdAt: string
 }
 
