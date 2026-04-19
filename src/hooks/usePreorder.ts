@@ -5,6 +5,8 @@ import {
   removeFromPreorder,
   updateQuantity,
   clearPreorder,
+  removeAllByVenue,
+  setQuantityBounded,
   PreorderItem,
 } from '@/redux/features/preorderSlice'
 
@@ -17,10 +19,18 @@ export function usePreorder() {
 
   const add = (item: Omit<PreorderItem, 'quantity'>) => dispatch(addToPreorder(item))
   const remove = (id: string) => dispatch(removeFromPreorder(id))
+  const removeByVenue = (venueId: string) => dispatch(removeAllByVenue(venueId))
   const setQuantity = (id: string, quantity: number) => dispatch(updateQuantity({ id, quantity }))
+  const setQuantityWithBounds = (id: string, quantity: number, min = 1, max = 99) =>
+    dispatch(setQuantityBounded({ id, quantity, min, max }))
   const clear = () => dispatch(clearPreorder())
   const isInCart = (id: string) => items.some((i) => i.id === id)
   const getQuantity = (id: string) => items.find((i) => i.id === id)?.quantity ?? 0
 
-  return { items, total, itemCount, add, remove, setQuantity, clear, isInCart, getQuantity }
+  return {
+    items, total, itemCount,
+    add, remove, removeByVenue,
+    setQuantity, setQuantityWithBounds,
+    clear, isInCart, getQuantity,
+  }
 }
