@@ -17,10 +17,11 @@ export default function QuantityEditor({ quantity, min = 1, max = 99, onChange }
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" role="group" aria-label="Quantity editor">
       <button
         onClick={decrement}
         disabled={quantity <= min}
+        aria-label="Decrease quantity"
         className="w-6 h-6 flex items-center justify-center bg-zinc-700 text-white rounded hover:bg-zinc-600 disabled:opacity-40 text-sm"
       >
         −
@@ -31,11 +32,13 @@ export default function QuantityEditor({ quantity, min = 1, max = 99, onChange }
         onChange={handleInput}
         min={min}
         max={max}
+        aria-label="Item quantity"
         className="w-10 text-center text-white text-sm bg-zinc-800 border border-zinc-700 rounded px-1 py-0.5 focus:outline-none focus:border-yellow-500"
       />
       <button
         onClick={increment}
         disabled={quantity >= max}
+        aria-label="Increase quantity"
         className="w-6 h-6 flex items-center justify-center bg-zinc-700 text-white rounded hover:bg-zinc-600 disabled:opacity-40 text-sm"
       >
         +
