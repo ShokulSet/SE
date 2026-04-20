@@ -24,8 +24,8 @@ export function usePreorder() {
   const setQuantityWithBounds = (id: string, quantity: number, min = 1, max = 99) =>
     dispatch(setQuantityBounded({ id, quantity, min, max }))
   const clear = () => dispatch(clearPreorder())
-  const isInCart = (id: string) => items.some((i) => i.id === id)
-  const getQuantity = (id: string) => items.find((i) => i.id === id)?.quantity ?? 0
+  const isInCart = (id: string) => items.some((i) => i._id === id)
+  const getQuantity = (id: string) => items.find((i) => i._id === id)?.quantity ?? 0
 
   return {
     items, total, itemCount,

@@ -19,7 +19,7 @@ export default function PreorderItemRow({ item, onQuantityChange, onRemove }: Pr
 
       <QuantityEditor
         quantity={item.quantity}
-        onChange={(q) => onQuantityChange(item.id, q)}
+        onChange={(q) => onQuantityChange(item._id, q)}
       />
 
       <span className="text-yellow-400 text-sm w-16 text-right">
@@ -27,7 +27,7 @@ export default function PreorderItemRow({ item, onQuantityChange, onRemove }: Pr
       </span>
 
       <button
-        onClick={() => onRemove(item.id)}
+        onClick={() => onRemove(item._id)}
         className="text-zinc-600 hover:text-red-400 transition text-xs"
         aria-label={`Remove ${item.name}`}
       >

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface PreorderItem {
-  id: string
+  _id: string
   name: string
   price: number
   category: string
@@ -22,7 +22,7 @@ const preorderSlice = createSlice({
   initialState,
   reducers: {
     addToPreorder(state, action: PayloadAction<Omit<PreorderItem, 'quantity'>>) {
-      const existing = state.items.find((item) => item.id === action.payload.id)
+      const existing = state.items.find((item) => item._id === action.payload._id)
       if (existing) {
         existing.quantity += 1
       } else {
@@ -30,10 +30,10 @@ const preorderSlice = createSlice({
       }
     },
     removeFromPreorder(state, action: PayloadAction<string>) {
-      state.items = state.items.filter((item) => item.id !== action.payload)
+      state.items = state.items.filter((item) => item._id !== action.payload)
     },
     updateQuantity(state, action: PayloadAction<{ id: string; quantity: number }>) {
-      const item = state.items.find((i) => i.id === action.payload.id)
+      const item = state.items.find((i) => i._id === action.payload.id)
       if (item) {
         item.quantity = Math.max(1, action.payload.quantity)
       }
@@ -48,7 +48,7 @@ const preorderSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; quantity: number; min?: number; max?: number }>
     ) {
-      const item = state.items.find((i) => i.id === action.payload.id)
+      const item = state.items.find((i) => i._id === action.payload.id)
       if (item) {
         const min = action.payload.min ?? 1
         const max = action.payload.max ?? 99

@@ -9,11 +9,11 @@ interface AddToPreorderButtonProps {
 
 export default function AddToPreorderButton({ item }: AddToPreorderButtonProps) {
   const { isInCart, add, remove } = usePreorder()
-  const inCart = isInCart(item.id)
+  const inCart = isInCart(item._id)
 
   return (
     <button
-      onClick={() => (inCart ? remove(item.id) : add(item))}
+      onClick={() => (inCart ? remove(item._id) : add(item))}
       className={`px-3 py-1 text-xs rounded transition font-medium ${
         inCart
           ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'

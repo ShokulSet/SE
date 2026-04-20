@@ -36,8 +36,12 @@ export default function EditMenuPage() {
   }, [token, id])
 
   const handleSubmit = async (data: Parameters<typeof updateMenu>[2]) => {
-    await updateMenu(token, id, data)
-    router.push('/admin/menu')
+    try {
+      await updateMenu(token, id, data)
+      router.push('/admin/menu')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update menu item')
+    }
   }
 
   if (status === 'loading' || loading) {

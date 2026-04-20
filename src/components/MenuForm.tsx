@@ -65,9 +65,8 @@ export default function MenuForm({ initial, venueId, onSubmit, submitLabel = 'Sa
         <input
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          type="number"
-          min="0"
-          step="0.01"
+          type="text"
+          inputMode="decimal"
           className="w-full bg-zinc-800 border border-zinc-700 text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-yellow-500"
           placeholder="e.g. 350"
         />

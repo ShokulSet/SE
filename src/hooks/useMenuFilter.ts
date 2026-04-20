@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react'
 import { MenuItem } from '@/libs/getMenus'
 
-type SortField = 'name' | 'price' | 'category'
+type SortField = 'name' | 'price' | 'category' | ''
 type SortOrder = 'asc' | 'desc'
 
 export function useMenuFilter(menus: MenuItem[]) {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
-  const [sortField, setSortField] = useState<SortField>('name')
+  const [sortField, setSortField] = useState<SortField>('')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
 
   const categories = useMemo(
@@ -16,6 +16,7 @@ export function useMenuFilter(menus: MenuItem[]) {
   )
 
   const filtered = useMemo(() => {
+    const effectiveField = sortField || 'name'
     return menus
       .filter((m) => {
         const matchSearch = m.name.toLowerCase().includes(search.toLowerCase())
@@ -23,8 +24,8 @@ export function useMenuFilter(menus: MenuItem[]) {
         return matchSearch && matchCategory
       })
       .sort((a, b) => {
-        const aVal = sortField === 'price' ? a.price : a[sortField]
-        const bVal = sortField === 'price' ? b.price : b[sortField]
+        const aVal = effectiveField === 'price' ? a.price : a[effectiveField as 'name' | 'category']
+        const bVal = effectiveField === 'price' ? b.price : b[effectiveField as 'name' | 'category']
         if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1
         if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1
         return 0

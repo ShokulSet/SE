@@ -19,8 +19,12 @@ export default function NewMenuPage() {
   }, [status, session, router])
 
   const handleSubmit = async (data: Parameters<typeof createMenu>[1]) => {
-    await createMenu(token, data)
-    router.push('/admin/menu')
+    try {
+      await createMenu(token, data)
+      router.push('/admin/menu')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to create menu item')
+    }
   }
 
   if (status === 'loading') {
@@ -43,7 +47,7 @@ export default function NewMenuPage() {
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
           <MenuForm
-            venueId=""
+            venueId={process.env.NEXT_PUBLIC_DEFAULT_VENUE_ID || '69a65f9b8fcb0904271bbfe3'}
             onSubmit={handleSubmit}
             submitLabel="Create Menu Item"
           />
