@@ -29,3 +29,8 @@ Restaurant Detail page displays full information about a selected restaurant inc
 - Image gallery shows at least one image or fallback placeholder
 - Rating displayed as stars (0–5)
 - Empty and error states handled gracefully
+
+## Review Notes (Pattaradanai)
+- Add breadcrumb navigation: Home > Search > Restaurant Name
+- Consider sticky header with restaurant name on scroll
+- Ensure mobile layout collapses menu preview to vertical list
