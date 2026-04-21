@@ -30,6 +30,11 @@ export default function RestaurantDetail({ restaurant }: RestaurantDetailProps) 
         {restaurant.description && (
           <p className="text-zinc-300 text-sm leading-relaxed pt-2">{restaurant.description}</p>
         )}
+        {restaurant.dailyrate !== undefined && (
+          <p className="text-yellow-400 text-sm font-semibold pt-1">
+            Rate: ฿{restaurant.dailyrate.toFixed(2)} / day
+          </p>
+        )}
       </div>
     </div>
   )
