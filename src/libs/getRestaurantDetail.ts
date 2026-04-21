@@ -13,6 +13,7 @@ export interface RestaurantDetail {
 }
 
 export default async function getRestaurantDetail(id: string): Promise<{ data: RestaurantDetail }> {
+  if (!id) throw new Error('Restaurant ID is required')
   const response = await fetch(`https://project-bn-sorawat.vercel.app/api/v1/restaurants/${id}`, {
     cache: 'no-store',
   })
