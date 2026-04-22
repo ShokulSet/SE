@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { ReviewItem } from "../../interface"
 
-const BASE = "https://project-bn-sorawat.vercel.app/api/v1"
+const BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1`
 
 interface Props {
     venueId: string
