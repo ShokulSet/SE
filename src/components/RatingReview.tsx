@@ -5,6 +5,16 @@ import { ReviewItem } from "../../interface"
 
 const BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1`
 
+const RATING_LABELS: Record<number, string> = {
+    1: "Poor",
+    2: "Fair",
+    3: "Good",
+    4: "Very Good",
+    5: "Excellent",
+}
+
+const MAX_DESCRIPTION = 500
+
 interface Props {
     venueId: string
     token: string | null
@@ -175,32 +185,44 @@ export default function RatingReview({ venueId, token, userId, initialReviews }:
                         Edit Your Review
                     </span>
 
-                    <div className="flex gap-1 mb-4">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                            <button
-                                key={s}
-                                onMouseEnter={() => setEditHovered(s)}
-                                onMouseLeave={() => setEditHovered(0)}
-                                onClick={() => setEditSelected(s)}
-                                className={`text-3xl transition-colors ${
-                                    (editHovered || editSelected) >= s
-                                        ? "text-yellow-400"
-                                        : "text-gray-700"
-                                }`}
-                            >
-                                ★
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                                <button
+                                    key={s}
+                                    onMouseEnter={() => setEditHovered(s)}
+                                    onMouseLeave={() => setEditHovered(0)}
+                                    onClick={() => setEditSelected(s)}
+                                    className={`text-3xl transition-all duration-150 ${
+                                        (editHovered || editSelected) >= s
+                                            ? "text-yellow-400 scale-110"
+                                            : "text-gray-700 hover:text-gray-500"
+                                    }`}
+                                >
+                                    ★
+                                </button>
+                            ))}
+                        </div>
+                        {(editHovered || editSelected) > 0 && (
+                            <span className="text-yellow-400 text-xs font-medium tracking-wide">
+                                {RATING_LABELS[editHovered || editSelected]}
+                            </span>
+                        )}
                     </div>
 
-                    <textarea
-                        value={editDescription}
-                        onChange={(e) => setEditDescription(e.target.value)}
-                        rows={4}
-                        placeholder="Write your review description..."
-                        className="w-full mb-4 bg-black/40 border border-gray-700 px-3 py-2 text-sm text-white
-                                   focus:outline-none focus:border-yellow-500 resize-none"
-                    />
+                    <div className="relative mb-4">
+                        <textarea
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value.slice(0, MAX_DESCRIPTION))}
+                            rows={4}
+                            placeholder="Write your review description..."
+                            className="w-full bg-black/40 border border-gray-700 px-3 py-2 text-sm text-white
+                                       focus:outline-none focus:border-yellow-500 resize-none"
+                        />
+                        <span className="absolute bottom-2 right-2 text-xs text-gray-600">
+                            {editDescription.length}/{MAX_DESCRIPTION}
+                        </span>
+                    </div>
 
                     <div className="flex gap-2">
                         <button
@@ -233,36 +255,54 @@ export default function RatingReview({ venueId, token, userId, initialReviews }:
                         Leave a Review
                     </span>
 
-                    <div className="flex gap-1 mb-4">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                            <button
-                                key={s}
-                                onMouseEnter={() => setHovered(s)}
-                                onMouseLeave={() => setHovered(0)}
-                                onClick={() => setSelected(s)}
-                                className={`text-3xl transition-colors ${
-                                    (hovered || selected) >= s ? "text-yellow-400" : "text-gray-700"
-                                }`}
-                            >
-                                ★
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                                <button
+                                    key={s}
+                                    onMouseEnter={() => setHovered(s)}
+                                    onMouseLeave={() => setHovered(0)}
+                                    onClick={() => setSelected(s)}
+                                    className={`text-3xl transition-all duration-150 ${
+                                        (hovered || selected) >= s
+                                            ? "text-yellow-400 scale-110"
+                                            : "text-gray-700 hover:text-gray-500"
+                                    }`}
+                                >
+                                    ★
+                                </button>
+                            ))}
+                        </div>
+                        {(hovered || selected) > 0 && (
+                            <span className="text-yellow-400 text-xs font-medium tracking-wide">
+                                {RATING_LABELS[hovered || selected]}
+                            </span>
+                        )}
                     </div>
 
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        rows={4}
-                        placeholder="Write your review description..."
-                        className="w-full mb-4 bg-black/40 border border-gray-700 px-3 py-2 text-sm text-white
-                                   focus:outline-none focus:border-yellow-500 resize-none"
-                    />
+                    <div className="relative mb-4">
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION))}
+                            rows={4}
+                            placeholder="Write your review description..."
+                            className="w-full bg-black/40 border border-gray-700 px-3 py-2 text-sm text-white
+                                       focus:outline-none focus:border-yellow-500 resize-none"
+                        />
+                        <span className="absolute bottom-2 right-2 text-xs text-gray-600">
+                            {description.length}/{MAX_DESCRIPTION}
+                        </span>
+                    </div>
+
+                    {!selected && (
+                        <p className="text-yellow-700 text-xs mb-3">Please select a star rating before submitting.</p>
+                    )}
 
                     <button
                         onClick={handleSubmit}
                         disabled={loading || !selected}
                         className="text-xs px-5 py-1.5 bg-yellow-500 text-black font-medium
-                                   hover:bg-yellow-400 transition disabled:opacity-40"
+                                   hover:bg-yellow-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {loading ? "Submitting..." : "Submit Review"}
                     </button>
