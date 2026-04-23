@@ -2,18 +2,9 @@
 
 import { useState } from "react"
 import { ReviewItem } from "../../interface"
+import { RATING_LABELS, MAX_DESCRIPTION } from "@/libs/reviewUtils"
 
 const BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1`
-
-const RATING_LABELS: Record<number, string> = {
-    1: "Poor",
-    2: "Fair",
-    3: "Good",
-    4: "Very Good",
-    5: "Excellent",
-}
-
-const MAX_DESCRIPTION = 500
 
 interface Props {
     venueId: string
