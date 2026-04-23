@@ -7,7 +7,7 @@ import {
   LayoutDashboard, UtensilsCrossed, CalendarCheck, Star,
   Plus, Pencil, Trash2, Search, ChevronDown, ChevronRight,
   X, Check, Store, Calendar, User, AlertTriangle, RefreshCw,
-  Menu as Bars,
+  Menu as Bars, ShoppingBag, Minus,
 } from 'lucide-react'
 
 import { MenuItem as MenuItemType, getAllMenus, createMenu, updateMenu, deleteMenu } from '@/libs/getMenus'
@@ -17,16 +17,18 @@ import getReservations from '@/libs/getReservations'
 import updateReservation from '@/libs/updateReservation'
 import deleteReservation from '@/libs/deleteReservation'
 import DateReserve from '@/components/DateReserve'
+import { getAllPreorders, updatePreorderItemQty, removePreorderItem, PreorderData } from '@/libs/getAllPreorders'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Section = 'overview' | 'menus' | 'reservations' | 'reviews'
+type Section = 'overview' | 'menus' | 'reservations' | 'reviews' | 'preorders'
 
 const NAV: { id: Section; label: string; Icon: React.ElementType; sub: string }[] = [
-  { id: 'overview',     label: 'Overview',         Icon: LayoutDashboard, sub: 'Dashboard stats'   },
-  { id: 'menus',        label: 'Menu Management',  Icon: UtensilsCrossed, sub: 'Add · Edit · Delete' },
-  { id: 'reservations', label: 'Reservations',     Icon: CalendarCheck,   sub: 'All bookings'      },
-  { id: 'reviews',      label: 'Reviews',          Icon: Star,            sub: 'Ratings & feedback' },
+  { id: 'overview',     label: 'Overview',         Icon: LayoutDashboard, sub: 'Dashboard stats'      },
+  { id: 'menus',        label: 'Menu Management',  Icon: UtensilsCrossed, sub: 'Add · Edit · Delete'  },
+  { id: 'reservations', label: 'Reservations',     Icon: CalendarCheck,   sub: 'All bookings'         },
+  { id: 'reviews',      label: 'Reviews',          Icon: Star,            sub: 'Ratings & feedback'   },
+  { id: 'preorders',    label: 'Pre-orders',       Icon: ShoppingBag,     sub: 'Orders by restaurant' },
 ]
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
@@ -101,6 +103,7 @@ export default function AdminDashboard() {
           {active === 'menus'        && <MenuSection         token={token} />}
           {active === 'reservations' && <ReservationsSection token={token} />}
           {active === 'reviews'      && <ReviewsSection      token={token} />}
+          {active === 'preorders'    && <PreordersSection    token={token} />}
         </div>
       </div>
     </div>
@@ -690,6 +693,280 @@ function ReservationsSection({ token }: { token: string }) {
           )}
         </div>
       ))}
+    </div>
+  )
+}
+
+// ─── Pre-orders Section ──────────────────────────────────────────────────────
+
+function PreordersSection({ token }: { token: string }) {
+  const [orders, setOrders] = useState<PreorderData[]>([])
+  const [venueNames, setVenueNames] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [editing, setEditing] = useState<{ venueId: string; menuId: string; qty: number } | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [toast, setToast] = useState('')
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(''), 3000)
+  }
+
+  const load = async () => {
+    if (!token) return
+    setLoading(true)
+    setError('')
+    try {
+      const [preRes, venueRes] = await Promise.all([
+        getAllPreorders(token),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1/restaurants`).then((r) => r.json()).catch(() => ({ data: [] })),
+      ])
+      const items: PreorderData[] = preRes.data ?? []
+      setOrders(items)
+      setExpanded(new Set(items.map((o) => o.venueId)))
+
+      const nameMap: Record<string, string> = {}
+      for (const v of venueRes.data ?? []) {
+        nameMap[v._id] = v.name
+      }
+      setVenueNames(nameMap)
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { load() }, [token])
+
+  function toggle(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  async function handleQtyChange(venueId: string, menuId: string, newQty: number) {
+    if (newQty < 1) {
+      await handleRemove(venueId, menuId)
+      return
+    }
+    setSaving(true)
+    try {
+      await updatePreorderItemQty(venueId, menuId, newQty)
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.venueId === venueId
+            ? { ...o, items: o.items.map((it) => it.menuId === menuId ? { ...it, quantity: newQty } : it) }
+            : o
+        )
+      )
+      setEditing(null)
+      showToast('Quantity updated')
+    } catch (e: any) {
+      alert(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleRemove(venueId: string, menuId: string) {
+    if (!confirm('Remove this item from the order?')) return
+    setSaving(true)
+    try {
+      await removePreorderItem(venueId, menuId)
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.venueId === venueId
+            ? { ...o, items: o.items.filter((it) => it.menuId !== menuId) }
+            : o
+        ).filter((o) => o.items.length > 0)
+      )
+      showToast('Item removed')
+    } catch (e: any) {
+      alert(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return (
+    <div className="flex items-center gap-3 text-zinc-500 text-sm py-12 justify-center">
+      <RefreshCw size={16} className="animate-spin" /> Loading pre-orders…
+    </div>
+  )
+
+  if (error) return (
+    <div className="flex items-center gap-2 text-red-400 text-sm p-3 border border-red-900/30 bg-red-900/10 rounded">
+      <AlertTriangle size={14} /> {error}
+    </div>
+  )
+
+  const totalItems = orders.reduce((s, o) => s + o.items.reduce((ss, it) => ss + it.quantity, 0), 0)
+
+  return (
+    <div>
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-yellow-500 text-black text-sm font-medium px-5 py-2.5 shadow-lg">
+          {toast}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-xs text-zinc-600 uppercase tracking-widest">
+          {orders.length} restaurant(s) · {totalItems} item(s) total
+        </p>
+        <div className="flex gap-3">
+          <button onClick={() => setExpanded(new Set(orders.map((o) => o.venueId)))} className="text-xs text-zinc-500 hover:text-yellow-500 transition">Expand all</button>
+          <span className="text-zinc-700">·</span>
+          <button onClick={() => setExpanded(new Set())} className="text-xs text-zinc-500 hover:text-yellow-500 transition">Collapse all</button>
+          <span className="text-zinc-700">·</span>
+          <button onClick={load} className="text-xs text-zinc-500 hover:text-yellow-500 transition flex items-center gap-1"><RefreshCw size={11} /> Refresh</button>
+        </div>
+      </div>
+
+      {orders.length === 0 ? (
+        <p className="text-zinc-600 text-sm py-12 text-center">No pre-orders found.</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {orders.map((order) => {
+            const name = venueNames[order.venueId] || order.venueId
+            const subtotal = order.items.reduce((s, it) => s + it.price * it.quantity, 0)
+            return (
+              <div key={order.venueId} className="border border-yellow-600/10 rounded overflow-hidden">
+                {/* Restaurant header */}
+                <button
+                  onClick={() => toggle(order.venueId)}
+                  className="w-full flex items-center justify-between px-5 py-4 bg-[#111] hover:bg-[#141414] transition text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <Store size={15} className="text-yellow-600/50 shrink-0" />
+                    <div>
+                      <p className="text-yellow-400 text-sm font-medium">{name}</p>
+                      <p className="text-zinc-600 text-xs mt-0.5">
+                        {order.items.length} menu item(s) · {order.items.reduce((s, it) => s + it.quantity, 0)} qty total
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span className="text-yellow-400 text-sm font-mono">฿{subtotal.toFixed(2)}</span>
+                    {expanded.has(order.venueId)
+                      ? <ChevronDown size={15} className="text-zinc-500" />
+                      : <ChevronRight size={15} className="text-zinc-500" />}
+                  </div>
+                </button>
+
+                {/* Items */}
+                {expanded.has(order.venueId) && (
+                  <div className="border-t border-yellow-600/10 divide-y divide-yellow-600/5">
+                    {/* Column header */}
+                    <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-5 py-2 bg-[#0d0d0d]">
+                      <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Item</span>
+                      <span className="text-[10px] text-zinc-600 uppercase tracking-widest text-right w-20">Unit price</span>
+                      <span className="text-[10px] text-zinc-600 uppercase tracking-widest text-center w-28">Quantity</span>
+                      <span className="text-[10px] text-zinc-600 uppercase tracking-widest text-right w-16">Actions</span>
+                    </div>
+
+                    {order.items.map((item) => {
+                      const isEditing = editing?.venueId === order.venueId && editing?.menuId === item.menuId
+                      return (
+                        <div key={item.menuId} className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-5 py-3 bg-[#0a0a0a] hover:bg-[#0c0c0c] transition">
+                          {/* Name */}
+                          <div>
+                            <p className="text-white text-sm">{item.name}</p>
+                            <p className="text-zinc-600 text-xs font-mono mt-0.5">฿{(item.price * item.quantity).toFixed(2)} subtotal</p>
+                          </div>
+
+                          {/* Unit price */}
+                          <span className="text-zinc-400 text-sm font-mono text-right w-20">฿{item.price.toFixed(2)}</span>
+
+                          {/* Quantity control */}
+                          <div className="flex items-center gap-1.5 w-28 justify-center">
+                            {isEditing ? (
+                              <>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={editing.qty}
+                                  onChange={(e) => setEditing({ ...editing, qty: Math.max(1, Number(e.target.value)) })}
+                                  className="w-14 bg-[#1a1a1a] border border-yellow-500/50 text-white text-sm text-center px-2 py-1 outline-none rounded"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => handleQtyChange(order.venueId, item.menuId, editing.qty)}
+                                  disabled={saving}
+                                  className="p-1 text-yellow-500 hover:text-yellow-300 transition"
+                                  title="Confirm"
+                                >
+                                  <Check size={14} />
+                                </button>
+                                <button
+                                  onClick={() => setEditing(null)}
+                                  className="p-1 text-zinc-500 hover:text-white transition"
+                                  title="Cancel"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => handleQtyChange(order.venueId, item.menuId, item.quantity - 1)}
+                                  disabled={saving}
+                                  className="p-1 border border-zinc-700 text-zinc-500 hover:border-yellow-500 hover:text-yellow-500 transition rounded"
+                                  title="Decrease"
+                                >
+                                  <Minus size={11} />
+                                </button>
+                                <button
+                                  onClick={() => setEditing({ venueId: order.venueId, menuId: item.menuId, qty: item.quantity })}
+                                  className="text-white text-sm font-mono w-8 text-center hover:text-yellow-400 transition"
+                                  title="Click to edit"
+                                >
+                                  {item.quantity}
+                                </button>
+                                <button
+                                  onClick={() => handleQtyChange(order.venueId, item.menuId, item.quantity + 1)}
+                                  disabled={saving}
+                                  className="p-1 border border-zinc-700 text-zinc-500 hover:border-yellow-500 hover:text-yellow-500 transition rounded"
+                                  title="Increase"
+                                >
+                                  <Plus size={11} />
+                                </button>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Delete */}
+                          <div className="flex justify-end w-16">
+                            <button
+                              onClick={() => handleRemove(order.venueId, item.menuId)}
+                              disabled={saving}
+                              className="p-1.5 border border-zinc-800 text-zinc-500 hover:border-red-500 hover:text-red-500 transition rounded"
+                              title="Remove item"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {/* Restaurant total */}
+                    <div className="px-5 py-3 bg-[#0d0d0d] flex justify-end">
+                      <p className="text-xs text-zinc-500 uppercase tracking-widest mr-3">Total</p>
+                      <p className="text-yellow-400 text-sm font-mono">฿{subtotal.toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
