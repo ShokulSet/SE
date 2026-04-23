@@ -35,6 +35,8 @@ export default function RatingReview({ venueId, token, userId, initialReviews }:
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+    const [deleting, setDeleting] = useState(false)
+    const [confirmDelete, setConfirmDelete] = useState(false)
 
     const myReview = reviews.find((r) => {
         const uid = typeof r.user === "string" ? r.user : r.user._id
@@ -77,6 +79,28 @@ export default function RatingReview({ venueId, token, userId, initialReviews }:
             setError(e.message)
         } finally {
             setLoading(false)
+        }
+    }
+
+    async function handleDelete() {
+        if (!token || !myReview) return
+        setDeleting(true)
+        setError("")
+        try {
+            const res = await fetch(`${BASE}/reviews/${myReview._id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.message || "Failed to delete review")
+            }
+            setReviews((prev) => prev.filter((r) => r._id !== myReview._id))
+            setConfirmDelete(false)
+        } catch (e: any) {
+            setError(e.message)
+        } finally {
+            setDeleting(false)
         }
     }
 
@@ -160,22 +184,52 @@ export default function RatingReview({ venueId, token, userId, initialReviews }:
                             ))}
                         </div>
 
-                        <button
-                            onClick={() => {
-                                setEditSelected(myReview.rating)
-                                setEditDescription(myReview.description || "")
-                                setIsEditing(true)
-                            }}
-                            className="text-xs text-yellow-500 border border-yellow-500 px-3 py-1
-                                       hover:bg-yellow-500 hover:text-black transition-all duration-200"
-                        >
-                            Edit
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => {
+                                    setEditSelected(myReview.rating)
+                                    setEditDescription(myReview.description || "")
+                                    setIsEditing(true)
+                                }}
+                                className="text-xs text-yellow-500 border border-yellow-500 px-3 py-1
+                                           hover:bg-yellow-500 hover:text-black transition-all duration-200"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={() => setConfirmDelete(true)}
+                                className="text-xs text-red-400 border border-red-800 px-3 py-1
+                                           hover:bg-red-900/30 transition-all duration-200"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </div>
 
                     <p className="text-sm text-gray-300 whitespace-pre-line">
                         {myReview.description?.trim() || "No description"}
                     </p>
+
+                    {confirmDelete && (
+                        <div className="mt-3 p-3 border border-red-800/40 bg-red-900/10 rounded">
+                            <p className="text-red-400 text-xs mb-3">Are you sure you want to delete your review?</p>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={deleting}
+                                    className="text-xs px-4 py-1 bg-red-600 text-white hover:bg-red-500 transition disabled:opacity-50"
+                                >
+                                    {deleting ? "Deleting..." : "Yes, Delete"}
+                                </button>
+                                <button
+                                    onClick={() => setConfirmDelete(false)}
+                                    className="text-xs px-4 py-1 border border-gray-700 text-gray-400 hover:text-white transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
