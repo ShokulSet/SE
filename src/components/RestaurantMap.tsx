@@ -5,28 +5,11 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+import { FALLBACK_COORDS, DEFAULT_CENTER, filterPinsWithCoords, resolveCoords, type RestaurantPinData } from '@/libs/mapUtils'
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
-export interface RestaurantPin {
-  _id: string
-  name: string
-  address: string
-  tel?: string
-  lat?: number
-  lng?: number
-}
-
-// Bangkok restaurant coordinates (fallback seeded data)
-const FALLBACK_COORDS: Record<string, [number, number]> = {
-  'ร้านอาหารป่ามหาเฮง V99':    [13.7563, 100.5018],
-  'The Grand Palace Dining':     [13.7500, 100.4927],
-  'Sushiro Premium Zen':         [13.7450, 100.5340],
-  'Pony Sweet Cafe':             [13.7620, 100.5660],
-  'ครัวเจ๊ง้อ สาขาต้นตำรับ':   [13.7380, 100.5100],
-  'ครัวเจ๊ง้อ สาขา2':           [13.7290, 100.5250],
-}
-
-const DEFAULT_CENTER: [number, number] = [13.7563, 100.5018] // Bangkok
+export type RestaurantPin = RestaurantPinData
 
 const restaurantIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
@@ -65,14 +48,17 @@ export default function RestaurantMap() {
     fetch(`${API_URL}/api/v1/restaurants`)
       .then((r) => r.json())
       .then((j) => {
-        const data: RestaurantPin[] = (j.data ?? []).map((r: any) => ({
-          _id: r._id,
-          name: r.name,
-          address: r.address,
-          tel: r.tel,
-          lat: r.lat ?? FALLBACK_COORDS[r.name]?.[0],
-          lng: r.lng ?? FALLBACK_COORDS[r.name]?.[1],
-        }))
+        const data: RestaurantPin[] = (j.data ?? []).map((r: any) => {
+          const coords = resolveCoords(r.name, r.lat, r.lng)
+          return {
+            _id: r._id,
+            name: r.name,
+            address: r.address,
+            tel: r.tel,
+            lat: coords?.[0],
+            lng: coords?.[1],
+          }
+        })
         setRestaurants(data)
       })
       .catch(() => {})
@@ -94,7 +80,7 @@ export default function RestaurantMap() {
     )
   }, [])
 
-  const pins = restaurants.filter((r) => r.lat !== undefined && r.lng !== undefined)
+  const pins = filterPinsWithCoords(restaurants)
 
   return (
     <div className="relative">
