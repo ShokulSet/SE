@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
+import { useEffect, useState } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -117,7 +117,13 @@ export default function RestaurantMap() {
         <RecenterMap center={center} />
 
         {userPos && (
-          <Marker position={userPos} icon={userIcon} />
+          <Marker position={userPos} icon={userIcon}>
+            <Popup>
+              <div style={{ fontFamily: 'sans-serif', fontSize: '12px' }}>
+                <strong>Your Location</strong>
+              </div>
+            </Popup>
+          </Marker>
         )}
 
         {pins.map((r) => (
@@ -125,7 +131,31 @@ export default function RestaurantMap() {
             key={r._id}
             position={[r.lat!, r.lng!]}
             icon={restaurantIcon}
-          />
+          >
+            <Popup>
+              <div style={{ fontFamily: 'sans-serif', minWidth: '160px' }}>
+                <p style={{ fontWeight: 700, fontSize: '13px', marginBottom: '4px', color: '#111' }}>
+                  {r.name}
+                </p>
+                {r.address && (
+                  <p style={{ fontSize: '11px', color: '#555', marginBottom: '4px' }}>
+                    📍 {r.address}
+                  </p>
+                )}
+                {r.tel && (
+                  <p style={{ fontSize: '11px', color: '#555', marginBottom: '6px' }}>
+                    📞 {r.tel}
+                  </p>
+                )}
+                <a
+                  href={`/venue/${r._id}`}
+                  style={{ fontSize: '11px', color: '#b45309', textDecoration: 'underline' }}
+                >
+                  View Details →
+                </a>
+              </div>
+            </Popup>
+          </Marker>
         ))}
       </MapContainer>
     </div>
