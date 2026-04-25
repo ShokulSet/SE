@@ -228,7 +228,7 @@ export default function MyOrdersPage() {
                 {expanded.has(venueId) && (
                   <div className="border-t border-zinc-800 divide-y divide-zinc-900">
                     {venueItems.map((item) => (
-                      <div key={item._id} className="flex items-center justify-between px-5 py-3 bg-[#0a0a0a]">
+                      <div key={item._id ?? `${item.venueId}-${item.name}`} className="flex items-center justify-between px-5 py-3 bg-[#0a0a0a]">
                         <div>
                           <p className="text-white text-sm">{item.name}</p>
                           <p className="text-zinc-500 text-xs">฿{item.price.toFixed(2)} × {item.quantity}</p>
@@ -270,7 +270,7 @@ export default function MyOrdersPage() {
                 <p className="text-zinc-500 text-sm text-center py-4">No items left — saving will cancel this order.</p>
               ) : (
                 editItems.map((item) => (
-                  <div key={item._id} className="flex items-center gap-3">
+                  <div key={item._id ?? `${item.venueId}-${item.name}`} className="flex items-center gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-sm truncate">{item.name}</p>
                       <p className="text-zinc-500 text-xs">฿{item.price.toFixed(2)} each</p>
