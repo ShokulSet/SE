@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { MenuItem } from '@/libs/getMenus'
 import MenuCard from '@/components/MenuCard'
 import PreorderList from '@/components/PreorderList'
 import { usePreorder } from '@/hooks/usePreorder'
 import { confirmPreorder } from '@/libs/getAllPreorders'
+import getReservations from '@/libs/getReservations'
 import Link from 'next/link'
-import { ShoppingBag, Loader2, CheckCircle, X } from 'lucide-react'
+import { ShoppingBag, Loader2, CheckCircle, X, CalendarX } from 'lucide-react'
 
 interface MenuGalleryClientProps {
   initialMenus: MenuItem[]
@@ -17,7 +18,7 @@ interface MenuGalleryClientProps {
 }
 
 export default function MenuGalleryClient({ initialMenus, venueName, venueId }: MenuGalleryClientProps) {
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const token = (session?.user as any)?.token as string | undefined
   const [categoryFilter, setCategoryFilter] = useState('')
   const { items, itemCount, removeByVenue } = usePreorder()
@@ -25,6 +26,23 @@ export default function MenuGalleryClient({ initialMenus, venueName, venueId }: 
   const [confirming, setConfirming] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
   const [confirmError, setConfirmError] = useState('')
+
+  // ── Reservation gate ─────────────────────────────────────────────────────
+  const [hasReservation, setHasReservation] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (sessionStatus === 'loading') return
+    if (!token || !venueId) { setHasReservation(false); return }
+
+    getReservations(token)
+      .then((data) => {
+        const active = (data.data ?? []).some(
+          (r: any) => r.restaurantId === venueId && r.status !== 'cancelled'
+        )
+        setHasReservation(active)
+      })
+      .catch(() => setHasReservation(false))
+  }, [token, venueId, sessionStatus])
 
   const categories = Array.from(new Set(initialMenus.map((m) => m.category))).sort()
   const filtered = categoryFilter ? initialMenus.filter((m) => m.category === categoryFilter) : initialMenus
@@ -74,6 +92,20 @@ export default function MenuGalleryClient({ initialMenus, venueName, venueId }: 
             </p>
           </div>
 
+          {/* ── Reservation warning banner ─────────────────────────────── */}
+          {hasReservation === false && (
+            <div className="mb-6 flex items-start gap-3 px-4 py-3 border border-yellow-600/30 bg-yellow-500/5 rounded">
+              <CalendarX size={16} className="text-yellow-500 shrink-0 mt-0.5" />
+              <div className="text-xs text-yellow-200/70 leading-relaxed">
+                <span className="font-medium text-yellow-400">No reservation found.</span>{' '}
+                Please make a reservation at this restaurant before placing a pre-order.{' '}
+                <Link href="/booking" className="underline text-yellow-400 hover:text-yellow-300 transition">
+                  Book a table →
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Category filter */}
           {categories.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
@@ -106,7 +138,7 @@ export default function MenuGalleryClient({ initialMenus, venueName, venueId }: 
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((menu) => (
-                <MenuCard key={menu._id} menu={menu} />
+                <MenuCard key={menu._id} menu={menu} disablePreorder={hasReservation === false} />
               ))}
             </div>
           )}
@@ -117,7 +149,17 @@ export default function MenuGalleryClient({ initialMenus, venueName, venueId }: 
           <div className="sticky top-6 flex flex-col gap-3">
             <PreorderList />
 
-            {/* Confirm button — shown when venue has items */}
+            {/* No-reservation notice in sidebar */}
+            {hasReservation === false && (
+              <div className="bg-zinc-900 border border-yellow-600/20 rounded-lg p-4 flex items-start gap-3">
+                <CalendarX size={15} className="text-yellow-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Please make a reservation before preordering.
+                </p>
+              </div>
+            )}
+
+            {/* Confirm button — shown when venue has items and reservation exists */}
             {venueItems.length > 0 && !confirmed && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
@@ -133,8 +175,9 @@ export default function MenuGalleryClient({ initialMenus, venueName, venueId }: 
 
                 <button
                   onClick={handleConfirm}
-                  disabled={confirming}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 bg-yellow-500 text-black font-medium rounded hover:bg-yellow-400 transition disabled:opacity-60 text-sm"
+                  disabled={confirming || !hasReservation}
+                  title={!hasReservation ? 'You need a reservation at this restaurant to preorder' : undefined}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 bg-yellow-500 text-black font-medium rounded hover:bg-yellow-400 transition disabled:opacity-40 disabled:cursor-not-allowed text-sm"
                 >
                   {confirming
                     ? <><Loader2 size={14} className="animate-spin" /> Confirming…</>

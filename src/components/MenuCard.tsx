@@ -6,9 +6,10 @@ import AddToPreorderButton from './AddToPreorderButton'
 
 interface MenuCardProps {
   menu: MenuItem
+  disablePreorder?: boolean
 }
 
-export default function MenuCard({ menu }: MenuCardProps) {
+export default function MenuCard({ menu, disablePreorder }: MenuCardProps) {
   const { getQuantity } = usePreorder()
   const qty = getQuantity(menu._id)
 
@@ -39,6 +40,7 @@ export default function MenuCard({ menu }: MenuCardProps) {
                 category: menu.category,
                 venueId: menu.venueId,
               }}
+              disabled={disablePreorder}
             />
           </div>
         </div>
