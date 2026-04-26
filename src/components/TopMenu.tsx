@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
-  AudioWaveform, Search, MapPin, BookOpen,
+  AudioWaveform, BookOpen,
   Receipt, CalendarCheck, Plus, ShoppingBag, ChevronDown,
 } from 'lucide-react'
 import AuthButton from './AuthButton'
@@ -81,22 +81,12 @@ export default function TopMenu() {
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <AudioWaveform className="text-yellow-500" size={22} />
           <h1 className="font-playfair text-xl font-bold tracking-widest text-yellow-500">
-            NEWWAVE
+            PutterLuvMom 
           </h1>
         </Link>
 
         {/* ── Nav ──────────────────────────────────────────── */}
         <div className="flex items-center gap-2">
-
-          {/* Discover — Search icon */}
-          <NavDropdown
-            icon={<Search size={16} />}
-            label="Discover"
-            items={[
-              { href: '/search', icon: <Search size={13} />,  label: 'Search Restaurants' },
-              { href: '/map',    icon: <MapPin size={13} />,  label: 'Map View' },
-            ]}
-          />
 
           {/* Orders — ShoppingBag icon */}
           <NavDropdown
