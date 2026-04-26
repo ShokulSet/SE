@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.46.0-jammy
+    working_dir: /app
+    volumes:
+      - ./:/app
+    depends_on:
+      - frontend
+    command: npx playwright test
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
