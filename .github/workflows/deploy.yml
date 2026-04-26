@@ -53,12 +53,10 @@ jobs:
           NEXT_PUBLIC_MENU_API_URL: ${{ secrets.NEXT_PUBLIC_MENU_API_URL }}
           NEXT_PUBLIC_DEFAULT_VENUE_ID: ${{ secrets.NEXT_PUBLIC_DEFAULT_VENUE_ID }}
 
-      - name: Start app and run E2E tests
-        run: |
-          npm run start &
-          npx wait-on http://localhost:3000 --timeout 60000
-          npx playwright test
+      - name: Run E2E tests
+        run: npx playwright test
         env:
+          CI: true
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
           PLAYWRIGHT_BASE_URL: http://localhost:3000
