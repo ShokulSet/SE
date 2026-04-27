@@ -756,7 +756,7 @@ function PreordersSection({ token }: { token: string }) {
     }
     setSaving(true)
     try {
-      await updatePreorderItemQty(venueId, menuId, newQty)
+      await updatePreorderItemQty(venueId, menuId, newQty, token)
       setOrders((prev) =>
         prev.map((o) =>
           o.venueId === venueId
@@ -777,7 +777,7 @@ function PreordersSection({ token }: { token: string }) {
     if (!confirm('Remove this item from the order?')) return
     setSaving(true)
     try {
-      await removePreorderItem(venueId, menuId)
+      await removePreorderItem(venueId, menuId, token)
       setOrders((prev) =>
         prev.map((o) =>
           o.venueId === venueId

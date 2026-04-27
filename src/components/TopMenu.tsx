@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
   AudioWaveform, BookOpen,
-  Receipt, CalendarCheck, Plus, ShoppingBag, ChevronDown,
+  CalendarCheck, Plus, ShoppingBag, ChevronDown,
 } from 'lucide-react'
 import AuthButton from './AuthButton'
 
@@ -93,9 +93,8 @@ export default function TopMenu() {
             icon={<ShoppingBag size={16} />}
             label="Orders"
             items={[
-              { href: '/menu',          icon: <BookOpen size={13} />,    label: 'Browse Menu' },
-              { href: '/my-orders',     icon: <ShoppingBag size={13} />, label: 'My Orders' },
-              { href: '/order-history', icon: <Receipt size={13} />,     label: 'Order History' },
+              { href: '/menu',      icon: <BookOpen size={13} />,    label: 'Browse Menu' },
+              { href: '/my-orders', icon: <ShoppingBag size={13} />, label: 'My Orders' },
             ]}
           />
 

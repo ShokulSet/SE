@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_MENU_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+const API_URL = typeof window !== 'undefined'
+    ? ''
+    : (process.env.NEXT_PUBLIC_MENU_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')
 
 export interface MenuItem {
   _id: string

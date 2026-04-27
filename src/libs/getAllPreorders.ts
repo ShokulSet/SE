@@ -26,18 +26,23 @@ export async function getAllPreorders(token: string): Promise<{ success: boolean
   return res.json()
 }
 
-export async function updatePreorderItemQty(venueId: string, menuId: string, quantity: number): Promise<void> {
+export async function updatePreorderItemQty(venueId: string, menuId: string, quantity: number, token?: string): Promise<void> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
   const res = await fetch(`${API_URL}/api/v1/preorders/${venueId}/items/${menuId}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ quantity }),
   })
   if (!res.ok) throw new Error('Failed to update item')
 }
 
-export async function removePreorderItem(venueId: string, menuId: string): Promise<void> {
+export async function removePreorderItem(venueId: string, menuId: string, token?: string): Promise<void> {
+  const headers: Record<string, string> = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
   const res = await fetch(`${API_URL}/api/v1/preorders/${venueId}/items/${menuId}`, {
     method: 'DELETE',
+    headers,
   })
   if (!res.ok) throw new Error('Failed to remove item')
 }
