@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')
 
 export default async function userLogIn(userEmail: string, userPassword: string) {
     const response = await fetch(
@@ -16,7 +16,8 @@ export default async function userLogIn(userEmail: string, userPassword: string)
     );
 
     if (!response.ok) {
-        throw new Error("Failed to log in");
+        const errBody = await response.json().catch(() => ({}))
+        throw new Error(errBody.message || errBody.error || `Login failed (${response.status})`)
     }
 
     const json = await response.json();

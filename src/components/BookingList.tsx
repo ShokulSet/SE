@@ -61,7 +61,7 @@ export default function BookingList() {
         if (!editDate) return
         try {
             const dateTimeStr = `${dayjs(editDate).format("YYYY-MM-DD")}T${editTime}:00.000Z`
-            await updateReservation(id, dateTimeStr, token)
+            await updateReservation(id, dateTimeStr, editTime, token)
             setEditingId(null)
             fetchBookings()
         } catch (err: any) {
@@ -150,7 +150,7 @@ export default function BookingList() {
                                 {/* วันเวลา */}
                                 <div className="flex items-center gap-2 text-gray-400 text-xs">
                                     <Calendar size={12} className="text-yellow-600/60" />
-                                    {dayjs(item.reservationDate).format("DD MMM YYYY HH:mm")}
+                                    {item.date ? dayjs(item.date).format("DD MMM YYYY") : '—'} {item.time || ''}
                                 </div>
 
                                 {/* Booking ID */}
@@ -182,7 +182,7 @@ export default function BookingList() {
                                     onClick={() => {
                                         setEditingId(item._id)
                                         setEditDate(null)
-                                        setEditTime(dayjs(item.reservationDate).format("HH:mm"))
+                                        setEditTime(item.time || '18:00')
                                     }}
                                     className="p-2 border border-yellow-600/30 text-yellow-600/60 hover:border-yellow-500 hover:text-yellow-500 transition"
                                 >

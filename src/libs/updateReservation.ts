@@ -4,7 +4,8 @@ const API_URL = typeof window !== 'undefined'
 
 export default async function updateReservation(
     reservationId: string,
-    reservationDate: string,
+    date: string,
+    time: string,
     token: string
 ) {
     const response = await fetch(
@@ -15,7 +16,7 @@ export default async function updateReservation(
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ reservationDate }),
+            body: JSON.stringify({ date, time }),
         }
     )
     if (!response.ok) {

@@ -48,7 +48,7 @@ export default function AdminBookingList() {
         if (!editDate) return
         try {
             const dateTimeStr = `${dayjs(editDate).format("YYYY-MM-DD")}T${editTime}:00.000Z`
-            await updateReservation(id, dateTimeStr, token)
+            await updateReservation(id, dateTimeStr, editTime, token)
             setEditingId(null)
             fetchBookings()
         } catch (err: any) {

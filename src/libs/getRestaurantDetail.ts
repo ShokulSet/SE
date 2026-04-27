@@ -12,7 +12,7 @@ export interface RestaurantDetail {
   closetime: string
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')
 
 export default async function getRestaurantDetail(id: string): Promise<{ data: RestaurantDetail }> {
   if (!id) throw new Error('Restaurant ID is required')
