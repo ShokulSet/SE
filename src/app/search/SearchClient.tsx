@@ -7,7 +7,7 @@ import {
   BookOpen, SlidersHorizontal, ChevronDown,
 } from 'lucide-react'
 import {
-  applyFilters, extractCategories, SortOption,
+  applyFilters, extractCategories, extractLocations, SortOption,
 } from '@/libs/searchUtils'
 import { RestaurantItem } from '@/libs/getRestaurants'
 
@@ -29,26 +29,29 @@ const RATING_OPTIONS = [
 export default function SearchClient({ initialRestaurants }: { initialRestaurants: RestaurantItem[] }) {
   const [query,      setQuery]      = useState('')
   const [category,   setCategory]   = useState('')
+  const [location,   setLocation]   = useState('')
   const [minRating,  setMinRating]  = useState('')
   const [sort,       setSort]       = useState<SortOption>('')
   const [showFilter, setShowFilter] = useState(false)
 
   const categories = useMemo(() => extractCategories(initialRestaurants), [initialRestaurants])
+  const locations  = useMemo(() => extractLocations(initialRestaurants),  [initialRestaurants])
   const filtered   = useMemo(
-    () => applyFilters(initialRestaurants, { query, category, minRating, sort }),
-    [initialRestaurants, query, category, minRating, sort],
+    () => applyFilters(initialRestaurants, { query, category, location, minRating, sort }),
+    [initialRestaurants, query, category, location, minRating, sort],
   )
 
   const activeFilters: { label: string; onRemove: () => void }[] = []
-  if (query)     activeFilters.push({ label: `"${query}"`,   onRemove: () => setQuery('') })
-  if (category)  activeFilters.push({ label: category,       onRemove: () => setCategory('') })
-  if (minRating) activeFilters.push({ label: `${minRating}★+`, onRemove: () => setMinRating('') })
+  if (query)     activeFilters.push({ label: `"${query}"`,        onRemove: () => setQuery('') })
+  if (category)  activeFilters.push({ label: category,            onRemove: () => setCategory('') })
+  if (location)  activeFilters.push({ label: `📍 ${location}`,   onRemove: () => setLocation('') })
+  if (minRating) activeFilters.push({ label: `${minRating}★+`,   onRemove: () => setMinRating('') })
   if (sort)      activeFilters.push({ label: SORT_OPTIONS.find(s => s.value === sort)!.label, onRemove: () => setSort('') })
 
-  const filterCount = [category, minRating].filter(Boolean).length
+  const filterCount = [category, location, minRating].filter(Boolean).length
 
   function clearAll() {
-    setQuery(''); setCategory(''); setMinRating(''); setSort('')
+    setQuery(''); setCategory(''); setLocation(''); setMinRating(''); setSort('')
   }
 
   return (
@@ -130,22 +133,34 @@ export default function SearchClient({ initialRestaurants }: { initialRestaurant
 
         {/* ── Filter panel ────────────────────────────────────────── */}
         {showFilter && (
-          <div className="mb-4 p-5 bg-[#0f0f0f] border border-yellow-600/15 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="mb-4 p-5 bg-[#0f0f0f] border border-yellow-600/15 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Category */}
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-widest mb-3">Category</p>
               <div className="flex flex-wrap gap-2">
-                <FilterChip
-                  active={!category}
-                  onClick={() => setCategory('')}
-                  label="All"
-                />
+                <FilterChip active={!category} onClick={() => setCategory('')} label="All" />
                 {categories.map(c => (
                   <FilterChip
                     key={c}
                     active={category === c}
                     onClick={() => setCategory(category === c ? '' : c)}
                     label={c}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Location */}
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-3">Location</p>
+              <div className="flex flex-wrap gap-2">
+                <FilterChip active={!location} onClick={() => setLocation('')} label="All" />
+                {locations.map(l => (
+                  <FilterChip
+                    key={l}
+                    active={location === l}
+                    onClick={() => setLocation(location === l ? '' : l)}
+                    label={l}
                   />
                 ))}
               </div>

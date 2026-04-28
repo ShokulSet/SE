@@ -5,6 +5,7 @@ export type SortOption = 'rating_desc' | 'rating_asc' | 'name_asc' | 'name_desc'
 export interface FilterParams {
   query?: string
   category?: string
+  location?: string
   minRating?: string
   sort?: SortOption
 }
@@ -50,9 +51,16 @@ export function sortRestaurants(list: RestaurantItem[], sort: SortOption): Resta
   return sorted
 }
 
+export function filterByLocation(list: RestaurantItem[], location: string): RestaurantItem[] {
+  if (!location) return list
+  const loc = location.toLowerCase()
+  return list.filter((r) => (r.address ?? '').toLowerCase().includes(loc))
+}
+
 export function applyFilters(list: RestaurantItem[], params: FilterParams): RestaurantItem[] {
   let result = filterByKeyword(list, params.query ?? '')
   result = filterByCategory(result, params.category ?? '')
+  result = filterByLocation(result, params.location ?? '')
   result = filterByRating(result, params.minRating ?? '')
   result = sortRestaurants(result, params.sort ?? '')
   return result
@@ -60,4 +68,12 @@ export function applyFilters(list: RestaurantItem[], params: FilterParams): Rest
 
 export function extractCategories(list: RestaurantItem[]): string[] {
   return Array.from(new Set(list.map((r) => r.category).filter(Boolean))) as string[]
+}
+
+export function extractLocations(list: RestaurantItem[]): string[] {
+  const locations = list.map((r) => {
+    const parts = (r.address ?? '').split(',')
+    return parts[parts.length - 1].trim()
+  }).filter(Boolean)
+  return Array.from(new Set(locations)).sort()
 }
