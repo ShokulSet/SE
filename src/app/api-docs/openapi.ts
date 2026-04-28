@@ -45,7 +45,7 @@ const spec = {
           restaurantId: { type: 'string' },
           userId: { type: 'string' },
           rating: { type: 'number', minimum: 1, maximum: 5 },
-          comment: { type: 'string' },
+          description: { type: 'string' },
           createdAt: { type: 'string', format: 'date-time' },
         },
       },
@@ -261,6 +261,32 @@ const spec = {
           },
         },
       },
+      post: {
+        tags: ['Reviews'],
+        summary: 'Create a review for a restaurant',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Restaurant ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['rating'],
+                properties: {
+                  rating: { type: 'number', minimum: 1, maximum: 5 },
+                  description: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          201: { description: 'Review created' },
+          401: { description: 'Unauthorized' },
+          400: { description: 'Validation error' },
+        },
+      },
     },
     '/api/v1/reviews': {
       get: {
@@ -283,6 +309,44 @@ const spec = {
             },
           },
           401: { description: 'Unauthorized' },
+        },
+      },
+    },
+    '/api/v1/reviews/{id}': {
+      put: {
+        tags: ['Reviews'],
+        summary: 'Update a review',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Review ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  rating: { type: 'number', minimum: 1, maximum: 5 },
+                  description: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: 'Review updated' },
+          401: { description: 'Unauthorized' },
+          404: { description: 'Not found' },
+        },
+      },
+      delete: {
+        tags: ['Reviews'],
+        summary: 'Delete a review',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Review ID' }],
+        responses: {
+          200: { description: 'Review deleted' },
+          401: { description: 'Unauthorized' },
+          404: { description: 'Not found' },
         },
       },
     },
@@ -349,9 +413,10 @@ const spec = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['reservationDate'],
+                required: ['date', 'time'],
                 properties: {
-                  reservationDate: { type: 'string', format: 'date-time' },
+                  date: { type: 'string', format: 'date', example: '2025-06-01' },
+                  time: { type: 'string', example: '18:00' },
                 },
               },
             },

@@ -895,6 +895,7 @@ function PreordersSection({ token }: { token: string }) {
                         {order.items.length} menu item(s) · {order.items.reduce((s, it) => s + it.quantity, 0)} qty total
                       </p>
                       <p className="text-zinc-700 text-[10px] font-mono mt-0.5">Order ID: {order._id}</p>
+                      <p className="text-zinc-500 text-xs font-mono mt-0.5">Restaurant ID: {order.venueId}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
