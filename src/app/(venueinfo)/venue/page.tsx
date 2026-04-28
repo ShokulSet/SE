@@ -1,5 +1,5 @@
 import getVenues from '@/libs/getVenues'
-import VenueCatalog from '@/components/VenueCatalog'
+import VenueSortClient from './VenueSortClient'
 
 export default async function VenuePage() {
     const venuesJson = await getVenues()
@@ -37,8 +37,8 @@ export default async function VenuePage() {
                 </p>
             </div>
 
-            {/* Catalog */}
-            <VenueCatalog venuesJson={venuesJson} />
+            {/* Catalog with sort */}
+            <VenueSortClient venuesJson={venuesJson} />
         </div>
     )
 }
